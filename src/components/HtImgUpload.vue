@@ -30,7 +30,7 @@ export default defineComponent({
     //fileList: Array,
   },
   setup(props, { emit }) {
-    debugger
+    
     // const fileList =UploadUserFile  ref([])
     //const fileList = ref([])
     //const fileList = ref(props.fileList || []) // 使用 props.fileList

@@ -40,7 +40,7 @@ export default defineComponent({
       type: String,
       default: '请选择',
     },
- 
+
     footerFormat: {
       type: Function as PropType<(props: { total: number; selected: number }) => string>,
       default: (props: { total: number; selected: number }) => `共 ${props.total} 条，已选择 ${props.selected} 条`,
@@ -79,7 +79,7 @@ export default defineComponent({
     }
 
     const filteredData = computed(() => {
-        debugger
+      // debugger
       const { data, idKey, nameKey } = props
       return data.filter((item: TransferData) => item[nameKey].toLowerCase().includes(keyword.value.toLowerCase()))
         .map((item: TransferData) => ({ ...item, key: item[idKey], label: item[nameKey] }))
@@ -104,11 +104,9 @@ export default defineComponent({
 
     <ElDialog v-model="dialogVisible" title="选择" :before-close="handleClose" width="50%">
       <ElTransfer
-        v-model="selected" :data="filteredData" :titles="[fromTitle, toTitle]"  
-        :props="{ key: idKey, label: nameKey }"     @change="handleChange"
-      >
- 
-      </ElTransfer>
+        v-model="selected" :data="filteredData" :titles="[fromTitle, toTitle]"
+        :props="{ key: idKey, label: nameKey }" @change="handleChange"
+      />
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">
           取消

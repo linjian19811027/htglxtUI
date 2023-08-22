@@ -16,11 +16,7 @@ export default defineComponent({
       type: Object as () => User,
       default: () => ({
         id: undefined,
-        username: undefined,
-        email: undefined,
-        mobile: undefined,
-        sex: undefined,
-
+        oldPassword: undefined,
         password: undefined,
         confirmPassword: undefined,
       }),
@@ -65,13 +61,30 @@ export default defineComponent({
         callback()
     }
 
+    // const handleSubmit = () => {
+    //   form.value?.validate(async (valid) => {
+    //     if (valid)
+    //     {
+    //       emit('submit')
+    //     }
+    //   })
+    // }
+
     const handleSubmit = () => {
       form.value?.validate(async (valid) => {
-        if (valid)
-          emit('submit', user.value)
+        if (valid) {
+          UserService.editPassWord(user.value).then((response) => {
+            if (response.resultCode == '200') {
+              ElMessage.success('修改成功重新登陆')
+              useUserStore().logout()
+            }
+            else { ElMessage.error(response.message) }
+          }).catch((error) => {
+            ElMessage.error(error)
+          })
+        }
       })
     }
-
     const handleCancel = () => {
       emit('cancel')
     }
@@ -90,39 +103,19 @@ export default defineComponent({
 
 <template>
   <el-form ref="form" :model="user" label-width="80px" size="small">
-    <el-form-item label="用户名" prop="username" :rules="[{ message: '不能为空', required: true }]">
-      <el-input v-model.trim="user.username" />
+    <el-form-item v-if="user.id" label="原密码" prop="oldPassword" :rules="[{ message: '不能为空', required: true }]">
+      <el-input v-model.trim="user.oldPassword" type="password" show-password />
     </el-form-item>
-    <el-form-item v-if="!user.id" label="密码" prop="password" :rules="[{ message: '不能为空', required: true }]">
+    <el-form-item v-if="user.id" label="新密码" prop="password" :rules="[{ message: '不能为空', required: true }]">
       <el-input v-model.trim="user.password" type="password" show-password />
     </el-form-item>
-    <el-form-item v-if="!user.id" label="确认密码" prop="confirmPassword"
-      :rules="[{ message: '不能为空', required: true }, { validator: validatePass, trigger: 'blur' }]">
+    <el-form-item
+      v-if="user.id" label="确认密码" prop="confirmPassword"
+      :rules="[{ message: '不能为空', required: true }, { validator: validatePass, trigger: 'blur' }]"
+    >
       <el-input v-model.trim="user.confirmPassword" type="password" show-password />
     </el-form-item>
 
-    <el-form-item label="邮箱" prop="email">
-      <el-input v-model.trim="user.email" />
-    </el-form-item>
-
-    <el-form-item label="电话" w="1/2" :rules="[{ max: 12, message: '请输入正确的手机号', trigger: 'blur' }]" prop="mobile">
-      <el-input v-model.trim="user.mobile" />
-    </el-form-item>
-    <el-form-item label="性别" prop="sex">
-      <el-radio-group v-model="user.sex">
-        <el-radio :label="1">
-          男
-        </el-radio>
-        <el-radio :label="2">
-          女
-        </el-radio>
-      </el-radio-group>
-    </el-form-item>
-    <el-form-item label="角色" prop="email">
-      <el-select v-model.number="user.roleId" placeholder="Select">
-        <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id" />
-      </el-select>
-    </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="handleSubmit">
         保存

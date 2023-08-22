@@ -20,6 +20,7 @@ async function submit() {
       // console.log(res);
       if (res.data.resultCode === 200) {
         localStorage.setItem('token', `Bearer ${res.data.message}`)
+        localStorage.setItem('userInfo', `${JSON.stringify(res.data.data)}`)
         user.generateRoutes()
         ElMessage.success('登录成功')
         router.push('/')

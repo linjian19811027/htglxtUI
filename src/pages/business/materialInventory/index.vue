@@ -124,7 +124,7 @@ export default defineComponent({
           </el-button-group>
         </el-row> -->
         <el-table :data="materialInventorys" stripe sticky-header border>
-          <el-table-column prop="materialName" label="材料名称" />
+          <el-table-column prop="materialId_txt" label="材料名称" />
           <el-table-column prop="materialNo" label="材料编号" />
           <el-table-column prop="materialInventory" label="数量" />
 
@@ -176,4 +176,5 @@ meta:
   layout: home
   title: 库存查看
   icon: i-carbon:cube-view
+  order: 5
 </route>

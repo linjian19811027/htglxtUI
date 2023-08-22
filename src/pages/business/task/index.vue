@@ -2,15 +2,17 @@
 import { defineComponent, onMounted, ref } from 'vue'
 import type { Task } from './task'
 import { TaskService } from './task'
+
 import TaskFormOne from './components/formOne.vue'
 import TaskFormTwo from './components/formTwo.vue'
-import TaskFormThree from './components/formThree.vue'
+import TaskFormFour from './components/formFour.vue'
+import TaskFormFive from './components/formFive.vue'
 import UserRate from './components/userRate.vue'
 
 export default defineComponent({
 
   components: {
-    TaskFormOne, TaskFormTwo, TaskFormThree, UserRate,
+    TaskFormOne, TaskFormTwo, TaskFormFour, UserRate, TaskFormFive,
   },
   setup() {
     const currentPage = ref<number>(1)
@@ -19,8 +21,12 @@ export default defineComponent({
     const total = ref<number>(0)
     const taskId = ref<number>(0)
 
-    const dialogVisible = ref<boolean>(false)
+    // 创建，接收，返工，查看
+
+    const createDialogVisible = ref<boolean>(false)
     const editDialogVisible = ref<boolean>(false)
+    const viewDialogVisible = ref<boolean>(false)
+    const editDialogVisible1 = ref<boolean>(false)
     const rateDialogVisible = ref<boolean>(false)
 
     const selectedTask = ref<Task | null>(null)
@@ -79,22 +85,54 @@ export default defineComponent({
       fetchTasks()
     }
 
+    // 涉及创建，接收，返工，查看
+
+    // 创建
     const handleAdd = async (task: Task) => {
       await TaskService.addTask(task)
-      dialogVisible.value = false
+      createDialogVisible.value = false
       fetchTasks()
     }
 
+    // 返工,接收界面弹出
     const handleEdit = (task: Task) => {
       selectedTask.value = task
       if (typeof selectedTask.value.participantsIds === 'string')
         selectedTask.value.participantsIds = selectedTask.value.participantsIds.split(',').map(Number)
-
       editDialogVisible.value = true
     }
+    const handleEdit1 = (task: Task) => {
+      selectedTask.value = task
+      if (typeof selectedTask.value.participantsIds === 'string')
+        selectedTask.value.participantsIds = selectedTask.value.participantsIds.split(',').map(Number)
+      editDialogVisible1.value = true
+    }
 
-    const handleUpdate = async (task: Task) => {
-      await TaskService.updateTask(task)
+    // 查看界面弹出
+    const handleView = (task: Task) => {
+      selectedTask.value = task
+      if (typeof selectedTask.value.participantsIds === 'string')
+        selectedTask.value.participantsIds = selectedTask.value.participantsIds.split(',').map(Number)
+      viewDialogVisible.value = true
+    }
+
+    // 接收触发
+    const handleReceiveTask = async (task: Task) => {
+      await TaskService.receiveTask(task)
+      editDialogVisible.value = false
+      fetchTasks()
+    }
+
+    // 接收触发
+    const handleReceiveTask1 = async (task: Task) => {
+      await TaskService.receiveTask(task)
+      editDialogVisible1.value = false
+      fetchTasks()
+    }
+
+    // 返工触发
+    const handleReworkTask = async (task: Task) => {
+      await TaskService.reworkTask(task)
       editDialogVisible.value = false
       fetchTasks()
     }
@@ -116,13 +154,19 @@ export default defineComponent({
     const handleCancelEdit = () => {
       editDialogVisible.value = false
     }
+    const handleCancelEdit1 = () => {
+      editDialogVisible1.value = false
+    }
+    const handleCancelView = () => {
+      viewDialogVisible.value = false
+    }
+
     const handleCancelUserRateEdit = () => {
       rateDialogVisible.value = false
     }
-    const handleUserRateUpdate =  () => {
-     // await TaskService.updateTask(task)
+    const handleUserRateUpdate = () => {
+      // await TaskService.updateTask(task)
       rateDialogVisible.value = false
- 
     }
     onMounted(() => {
       fetchTasks()
@@ -143,22 +187,29 @@ export default defineComponent({
       pageSize,
       tasks,
       total,
-      dialogVisible,
+      createDialogVisible,
       editDialogVisible,
+      viewDialogVisible,
       selectedTask,
       handlePageChange,
       handleSearch,
       handleAdd,
       handleEdit,
-      handleUpdate,
+      handleEdit1,
+      handleView,
       handleDelete,
       handleCancel,
       handleCancelEdit,
+      handleCancelView,
       taskId,
       handleRate,
       rateDialogVisible,
       handleUserRateUpdate,
-      handleCancelUserRateEdit
+      handleCancelUserRateEdit,
+      handleCancelEdit1,
+      handleReceiveTask1,
+      handleReworkTask,
+      editDialogVisible1,
     }
   },
 
@@ -204,8 +255,8 @@ export default defineComponent({
         </el-row>
         <el-row type="flex" justify="start">
           <el-button-group>
-            <el-button type="primary" icon="el-icon-plus" @click="dialogVisible = true">
-              添加
+            <el-button type="primary" icon="el-icon-plus" @click="createDialogVisible = true">
+              创建任务
             </el-button>
           </el-button-group>
         </el-row>
@@ -227,10 +278,24 @@ export default defineComponent({
           <el-table-column label="操作">
             <template #default="{ row }">
               <el-button-group>
-                <el-button type="primary" size="small" @click="handleEdit(row)">
+                <el-button
+                  v-if="row.taskState == '1' || row.taskState == '1.1' " type="primary"
+                  size="small" @click="handleEdit(row)"
+                >
+                  普通接收
+                </el-button>
+
+                <el-button
+                  v-if=" row.taskState == '1.2'" type="primary"
+                  size="small" @click="handleEdit1(row)"
+                >
+                  返工接收
+                </el-button>
+
+                <el-button type="primary" size="small" @click="handleView(row)">
                   查看
                 </el-button>
-                <el-button type="danger" size="small" @click="handleRate(row.id)">
+                <el-button v-if="row.taskState == '3' && user.userInfo.sysPermissions.find(obj => obj.name == 'bus:task:rate')" type="danger" size="small" @click="handleRate(row.id)">
                   评分
                 </el-button>
               </el-button-group>
@@ -243,27 +308,49 @@ export default defineComponent({
             :total="total" @current-change="handlePageChange"
           />
         </div>
-        <!-- <el-dialog title="添加日志" :visible.sync="dialogVisible" width="50%"> -->
-        <el-dialog
-          v-model="dialogVisible" :close-on-click-modal="false" class="!w-2xl" draggable title="创建任务"
-          destroy-on-close="true"
-        >
-          <TaskFormOne is-editting="true" @submit="handleAdd" @cancel="handleCancel" />
-        </el-dialog>
-        <!-- <el-dialog title="编辑日志" :visible.sync="editDialogVisible" width="50%"> -->
 
         <el-dialog
-          v-model="editDialogVisible" :close-on-click-modal="false" class="!w-2xl" draggable title="查看任务"
+          v-model="createDialogVisible" :close-on-click-modal="false" class="!w-2xl" draggable title="创建任务"
           destroy-on-close="true"
         >
-          <TaskFormOne :task="selectedTask" is-editting="true" @submit="handleUpdate" @cancel="handleCancelEdit" />
+          <TaskFormOne :is-editting="true" @submit="handleAdd" @cancel="handleCancel" />
         </el-dialog>
 
         <el-dialog
-          v-model="rateDialogVisible" :close-on-click-modal="false" class="!w-2xl" draggable title="查看任务"
+          v-model="editDialogVisible" :close-on-click-modal="false" class="!w-2xl" draggable title="接收任务"
           destroy-on-close="true"
         >
-          <UserRate :task-id="taskId" is-editting="true" @submit="handleUserRateUpdate" @cancel="handleCancelUserRateEdit" />
+          <TaskFormTwo
+            :task="selectedTask" :is-editting="true" @submit1="handleReceiveTask" @submit2="handleReworkTask"
+            @cancel="handleCancelEdit"
+          />
+        </el-dialog>
+
+        <el-dialog
+          v-model="editDialogVisible1" :close-on-click-modal="false" class="!w-2xl" draggable title="接收任务"
+          destroy-on-close="true"
+        >
+          <TaskFormFour
+            :task="selectedTask" :is-editting="true" @submit="handleReceiveTask1"
+            @cancel="handleCancelEdit1"
+          />
+        </el-dialog>
+
+        <el-dialog
+          v-model="viewDialogVisible" :close-on-click-modal="false" class="!w-2xl" draggable title="查看任务"
+          destroy-on-close="true"
+        >
+          <TaskFormFive :task="selectedTask" :is-editting="false" @submit="handleView" @cancel="handleCancelView" />
+        </el-dialog>
+
+        <el-dialog
+          v-model="rateDialogVisible" :close-on-click-modal="false" class="!w-2xl" draggable title="用户打分"
+          destroy-on-close="true"
+        >
+          <UserRate
+            :task-id="taskId" :is-editting="true" @submit="handleUserRateUpdate"
+            @cancel="handleCancelUserRateEdit"
+          />
         </el-dialog>
       </el-tab-pane>
     </el-tabs>
@@ -282,4 +369,5 @@ meta:
   layout: home
   title: 任务列表
   icon: i-carbon:ibm-cloud-event-streams
+  order: 3
 </route>

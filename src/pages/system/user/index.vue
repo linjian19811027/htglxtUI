@@ -118,6 +118,7 @@ export default defineComponent({
           <el-table-column prop="email" label="电邮" />
           <el-table-column prop="mobile" label="电话" />
           <el-table-column prop="sex_txt" label="性别" />
+          <el-table-column prop="roleId_txt" label="角色" />
           <el-table-column label="操作">
             <template #default="{ row }">
               <el-button-group>
@@ -163,4 +164,5 @@ meta:
   layout: home
   title: 用户管理
   icon: i-ep:user
+  order: 13
 </route>

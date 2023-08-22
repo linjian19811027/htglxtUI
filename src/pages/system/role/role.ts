@@ -101,4 +101,56 @@ export class RoleService {
       },
     })
   }
+
+  public static async fetchPermission(): Promise<{ permissions: any[] }> {
+    const token = localStorage.getItem('token') || ''
+    const url = new URL('https://htglxtapi.inscode.cc/sysPermission', window.location.href)
+
+    try {
+      const response = await axios.get(url.href, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+      })
+      // 对返回结果进行解构赋值
+      const records = response.data.data
+      // 返回包含日志记录和总数的对象
+      return records
+    }
+    catch (error) {
+    }
+  }
+
+  public static async fetchPermissionByRole(roleId): Promise<{ permissions: any[] }> {
+    const token = localStorage.getItem('token') || ''
+    const url = new URL('https://htglxtapi.inscode.cc/sysRolePermission', window.location.href)
+    url.searchParams.set('roleId', roleId)
+    try {
+      const response = await axios.get(url.href, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+      })
+      // 对返回结果进行解构赋值
+      const records = response.data.data
+      // 返回包含日志记录和总数的对象
+      return records
+    }
+    catch (error) {
+    }
+  }
+
+  public static async submitRp(rp: any[]): Promise<void> {
+    const token = localStorage.getItem('token') || ''
+    await fetch('https://htglxtapi.inscode.cc/sysRolePermission', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token,
+      },
+      body: JSON.stringify(rp),
+    })
+  }
 }

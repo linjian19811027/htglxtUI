@@ -3,12 +3,11 @@ import { defineComponent, ref, watch } from 'vue'
 import type { Task } from '../task'
 import { TaskService } from '../task'
 
-// 接收任务
+//返工任务接收与普通接收的区别是，下达时间及完成时间可以选择，内容附件，项目要求也可以修改  ,而且只能接收不能返工了
 interface TaskFormProps {
   task?: Task
   isEditting?: boolean
-  onSubmit1?: (task: Task) => void
-  onSubmit2?: (task: Task) => void
+  onSubmit?: (task: Task) => void
   onCancel?: () => void
 }
 
@@ -55,20 +54,17 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    onSubmit1: {
+    onSubmit: {
       type: Function as () => (task: Task) => void,
       required: true,
     },
-    onSubmit2: {
-      type: Function as () => (task: Task) => void,
-      required: true,
-    },
+
     onCancel: {
       type: Function as () => () => void,
       required: true,
     },
   },
-  emits: ['submit1','submit2', 'cancel'],
+  emits: ['submit', 'cancel'],
   setup(props: TaskFormProps, { emit }) {
     const form = ref<Nullable<ElForm>>()
 
@@ -198,17 +194,11 @@ export default defineComponent({
     const handleSubmitReceive = () => {
       form.value?.validate(async (valid) => {
         if (valid)
-          emit('submit1', task.value)
+          emit('submit', task.value)
       })
     }
 
-    //返工
-    const handleSubmitRework = () => {
-      form.value?.validate(async (valid) => {
-        if (valid)
-          emit('submit2', task.value)
-      })
-    }
+
     // const handleReworkSubmit = () => {
     //   emit('handleReworkSubmit')
     // }
@@ -276,7 +266,7 @@ export default defineComponent({
       form,
       task,
       handleSubmitReceive,
-      handleSubmitRework,
+   
       handleCancel,
       beforeAvatarUpload,
       // handleAvatarSuccess,
@@ -306,7 +296,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <el-form ref="form" :model="task" label-width="150px" size="small">
+  <el-form ref="form" :model="task" label-width="80px" size="small">
     <el-form-item label="任务标题" prop="taskTitle">
       <el-input v-model.lazy="task.taskTitle" :disabled="!isEditting" />
     </el-form-item>
@@ -474,9 +464,7 @@ export default defineComponent({
       <el-button v-if="isEditting" type="primary" @click="handleSubmitReceive">
         接收
       </el-button>
-      <el-button v-if="isEditting" type="primary" @click="handleSubmitRework">
-        返工
-      </el-button>
+   
       <el-button @click="handleCancel">
         {{ isEditting ? '取消' : '返回' }}
       </el-button>

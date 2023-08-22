@@ -3,12 +3,11 @@ import { defineComponent, ref, watch } from 'vue'
 import type { Task } from '../task'
 import { TaskService } from '../task'
 
-// 接收任务
+// 完成任务
 interface TaskFormProps {
   task?: Task
   isEditting?: boolean
-  onSubmit1?: (task: Task) => void
-  onSubmit2?: (task: Task) => void
+  onSubmit?: (task: Task) => void
   onCancel?: () => void
 }
 
@@ -55,11 +54,7 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    onSubmit1: {
-      type: Function as () => (task: Task) => void,
-      required: true,
-    },
-    onSubmit2: {
+    onSubmit: {
       type: Function as () => (task: Task) => void,
       required: true,
     },
@@ -68,7 +63,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['submit1','submit2', 'cancel'],
+  emits: ['submit', 'cancel'],
   setup(props: TaskFormProps, { emit }) {
     const form = ref<Nullable<ElForm>>()
 
@@ -100,7 +95,7 @@ export default defineComponent({
 
     const getFileList = async () => {
       if (task.value.id) {
-         
+        // debugger
         const data1 = await TaskService.fetchSysFile(task.value.contentUpload1)
         uploadFileList1.value = data1
 
@@ -194,24 +189,13 @@ export default defineComponent({
       fetchTaskMaterial()
       getFileList()
     })
-    //接收
-    const handleSubmitReceive = () => {
+    const handleSubmit = () => {
       form.value?.validate(async (valid) => {
         if (valid)
-          emit('submit1', task.value)
+          emit('submit', task.value)
       })
     }
 
-    //返工
-    const handleSubmitRework = () => {
-      form.value?.validate(async (valid) => {
-        if (valid)
-          emit('submit2', task.value)
-      })
-    }
-    // const handleReworkSubmit = () => {
-    //   emit('handleReworkSubmit')
-    // }
     const handleCancel = () => {
       emit('cancel')
     }
@@ -275,8 +259,7 @@ export default defineComponent({
     return {
       form,
       task,
-      handleSubmitReceive,
-      handleSubmitRework,
+      handleSubmit,
       handleCancel,
       beforeAvatarUpload,
       // handleAvatarSuccess,
@@ -299,7 +282,7 @@ export default defineComponent({
       uploadFileList4,
       uploadFileList5,
       uploadFileList6,
-     // handleReworkSubmit,
+
     }
   },
 })
@@ -360,7 +343,14 @@ export default defineComponent({
         value-format="yyyy-MM-dd"
       />
     </el-form-item> -->
-
+    <el-form-item label="任务参与者" prop="participantsIds">
+      <!-- <el-input v-model.lazy="task.participantsIds" :disabled="!isEditting" /> -->
+      <!-- <ChoseUser v-model:key="task.participantsIds" :disabled="isEditting" :data="hduser" /> -->
+      <!-- <transfer-input v-model="selectedIds" :data="data"></transfer-input> -->
+      <el-select v-model="task.participantsIds" multiple placeholder="选择参与者">
+        <el-option v-for="item in hduser" :key="item.id" :label="item.username" :value="item.id" />
+      </el-select>
+    </el-form-item>
     <!-- <el-form-item label="任务参与者名称" prop="participantsNames">
       <el-input v-model.lazy="task.participantsNames" :disabled="!isEditting" />
     </el-form-item> -->
@@ -376,16 +366,7 @@ export default defineComponent({
         <el-radio label="已完成" />
       </el-radio-group>
     </el-form-item> -->
-    <!-- <el-form-item label="任务实际完成时间" prop="taskFactEndTime">
-      <el-date-picker v-model="task.taskFactEndTime" type="date" placeholder="选择日期" :disabled="!isEditting"
-        format="YYYY-MM-DD" value-format="YYYY-MM-DD HH:mm:ss" />
-    </el-form-item>
-    <el-form-item label="任务实际内容" prop="taskFactContent">
-      <el-input v-model.lazy="task.taskFactContent" :disabled="!isEditting" />
-    </el-form-item>
-    <el-form-item label="任务实际地址" prop="taskFactAddress">
-      <el-input v-model.lazy="task.taskFactAddress" :disabled="!isEditting" />
-    </el-form-item> -->
+
     <!-- <el-form-item label="图片展示没什么用">
       <img v-if="imageUrl" :src="imageUrl" class="avatar">
     </el-form-item> -->
@@ -413,57 +394,91 @@ export default defineComponent({
         :action="action" :headers="upLoadHeaders" :before-upload="beforeAvatarUpload"
       />
     </el-form-item>
-    <!-- <el-form-item label="任务完成上传1" prop="wanChengUpload1">
-      <HtUpload :uuid="task.wanChengUpload1" :file-list="uploadFileList5" button-text="选文件" :disabled="!isEditting"
-        :action="action" :headers="upLoadHeaders" :before-upload="beforeAvatarUpload" />
 
+    <el-form-item label="任务实际完成时间" prop="taskFactEndTime">
+      <el-date-picker
+        v-model="task.taskFactEndTime" type="date" placeholder="选择日期" :disabled="!isEditting"
+        format="YYYY-MM-DD" value-format="YYYY-MM-DD HH:mm:ss"
+      />
     </el-form-item>
-    <el-form-item label="任务完成上传2" prop="wanChengUpload2">
-      <HtUpload :uuid="task.wanChengUpload2" :file-list="uploadFileList6" button-text="选文件" :disabled="!isEditting"
-        :action="action" :headers="upLoadHeaders" :before-upload="beforeAvatarUpload" />
+    <el-form-item label="任务实际内容" prop="taskFactContent">
+      <el-input v-model.lazy="task.taskFactContent" :disabled="!isEditting" />
+    </el-form-item>
+    <el-form-item label="任务实际地址" prop="taskFactAddress">
+      <el-input v-model.lazy="task.taskFactAddress" :disabled="!isEditting" />
+    </el-form-item>
+    <el-form-item label="任务完成图片上传" prop="wanChengUpload1">
+      <HtImgUpload
+        :uuid="task.wanChengUpload1" :file-list="uploadFileList5" button-text="选文件" :disabled="!isEditting"
+        :action="action" :headers="upLoadHeaders" :before-avatar-upload="beforeAvatarUpload"
+      />
 
-    </el-form-item> -->
-    <el-form-item label="任务参与者" prop="participantsIds">
-      <el-select v-model="task.participantsIds" multiple placeholder="选择参与者">
-        <el-option v-for="item in hduser" :key="item.id" :label="item.username" :value="item.id" />
+      <!-- <el-upload
+        class="avatar-uploader" :disabled="!isEditting" name="file" :limit="1" :auto-upload="false"
+        :file-list="[]" :data="{ type: 'wanChengUpload1' }" :headers="{ Authorization: `Bearer ${token}` }"
+        action="https://htglxtapi.inscode.cc/sysFile/upload" :on-success="handleAvatarSuccess"
+        :before-upload="beforeAvatarUpload"
+      >
+        <el-button slot="trigger" size="small" :disabled="!isEditting">
+          <i class="el-icon-upload2" /> 选择文件
+        </el-button>
+        <el-button size="small" type="success" :disabled="!isEditting">
+          上传文件
+        </el-button>
+        <div slot="tip" class="el-upload__tip">
+          支持格式：jpg/png/gif，文件大小不超过2M
+        </div>
+      </el-upload> -->
+    </el-form-item>
+    <el-form-item label="任务完成音频上传" prop="wanChengUpload2">
+      <HtUpload
+        :uuid="task.wanChengUpload2" :file-list="uploadFileList6" button-text="选文件" :disabled="!isEditting"
+        :action="action" :headers="upLoadHeaders" :before-upload="beforeAvatarUpload"
+      />
+
+      <!-- <el-upload
+        class="avatar-uploader" :disabled="!isEditting" name="file" :limit="1" :auto-upload="false"
+        :file-list="[]" :data="{ type: 'wanChengUpload2' }" :headers="{ Authorization: `Bearer ${token}` }"
+        action="https://htglxtapi.inscode.cc/sysFile/upload" :on-success="handleAvatarSuccess"
+        :before-upload="beforeAvatarUpload"
+      >
+        <el-button slot="trigger" size="small" :disabled="!isEditting">
+          <i class="el-icon-upload2" /> 选择文件
+        </el-button>
+        <el-button size="small" type="success" :disabled="!isEditting">
+          上传文件
+        </el-button>
+        <div slot="tip" class="el-upload__tip">
+          支持格式：jpg/png/gif，文件大小不超过2M
+        </div>
+      </el-upload> -->
+    </el-form-item>
+    <el-form-item label="下道工序完成时间" prop="nextTaskEndTime">
+      <el-date-picker
+        v-model="task.nextTaskEndTime" type="date" placeholder="选择日期" :disabled="!isEditting"
+        format="YYYY-MM-DD" value-format="YYYY-MM-DD HH:mm:ss"
+      />
+    </el-form-item>
+
+    <el-form-item label="下道工序任务类型" prop="nextTaskType">
+      <!-- <el-input v-model.lazy="task.taskType" :disabled="!isEditting" /> -->
+      <el-select v-model.lazy="task.nextTaskType" placeholder="请选择任务类别" :disabled="!isEditting">
+        <el-option key="undefined" label="请选择任务类别" :value="undefined" />
+        <el-option
+          v-for="item in options" :key="item.value" :label="item.name" :value="item.value"
+          :disabled="item.value == task.taskType"
+        />
       </el-select>
     </el-form-item>
     <el-form-item label="项目所需材料" prop="taskMaterials">
       <el-collapse v-model="activeNames">
         <el-collapse-item title="材料" name="1">
-          <el-row type="flex" justify="space-between">
-            <el-col :span="12">
-              <el-select v-model="materialId" placeholder="请选择材料">
-                <el-option key="undefined" label="请选择材料" :value="undefined" />
-                <el-option v-for="item in materiaOptions" :key="item.id" :label="item.materialName" :value="item.id" />
-              </el-select>
-            </el-col>
-            <el-col :span="12">
-              <el-input v-model="predictAmount" placeholder="请输入预估数量" />
-            </el-col>
-          </el-row>
-          <el-row type="flex" justify="start">
-            <el-button-group>
-              <el-button type="primary" icon="el-icon-plus" :disabled="!isEditting" @click="handleAddTaskMaterials">
-                添加
-              </el-button>
-            </el-button-group>
-          </el-row>
           <el-table :data="task.taskMaterials" stripe sticky-header border>
             <el-table-column prop="materialNo" label="材料" />
             <el-table-column prop="predictAmount" label="预估数量" />
-            <!-- <el-table-column prop="actualAmount" label="实际数量">
+            <el-table-column prop="actualAmount" label="实际数量">
               <template #default="scope">
                 <el-input v-model="scope.row.actualAmount" class="item" placeholder="请输入内容" />
-              </template>
-            </el-table-column> -->
-            <el-table-column label="操作">
-              <template #default="{ row }">
-                <el-button-group>
-                  <el-button type="danger" :disabled="!isEditting" size="small" @click="handleDeleteTaskMaterials(row)">
-                    删除
-                  </el-button>
-                </el-button-group>
               </template>
             </el-table-column>
           </el-table>
@@ -471,11 +486,8 @@ export default defineComponent({
       </el-collapse>
     </el-form-item>
     <el-form-item>
-      <el-button v-if="isEditting" type="primary" @click="handleSubmitReceive">
-        接收
-      </el-button>
-      <el-button v-if="isEditting" type="primary" @click="handleSubmitRework">
-        返工
+      <el-button v-if="isEditting" type="primary" @click="handleSubmit">
+        保存
       </el-button>
       <el-button @click="handleCancel">
         {{ isEditting ? '取消' : '返回' }}

@@ -3,6 +3,7 @@ import axios from 'axios'
 export interface MaterialLog {
   id: number
   materialId: string
+  materialId_txt: string
   materialNo: string
   taskId: number
   materialAmount: string
@@ -31,6 +32,7 @@ export class MaterialLogService {
       url.searchParams.set('createTimeStart', `${createTimeStart} 0:0:0`)
     if (createTimeEnd)
       url.searchParams.set('createTimeEnd', `${createTimeEnd} 23:59:59`)
+    url.searchParams.set('flow', 0)
     try {
       const response = await axios.get(url.href, {
         headers: {
@@ -46,6 +48,7 @@ export class MaterialLogService {
       const materialLogs: MaterialLog[] = records.map((record: any) => ({
         id: record.id,
         materialId: record.materialId,
+        materialId_txt: record.materialId_txt,
         materialNo: record.materialNo,
         taskId: record.taskId,
         materialAmount: record.materialAmount,

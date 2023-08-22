@@ -3,11 +3,12 @@ import { defineComponent, onMounted, ref } from 'vue'
 import type { Role } from './role'
 import { RoleService } from './role'
 import RoleForm from './components/form.vue'
+import PermissionForm from './components/permissionForm.vue'
 
 export default defineComponent({
 
   components: {
-    RoleForm,
+    RoleForm, PermissionForm,
   },
   setup() {
     const currentPage = ref<number>(1)
@@ -18,6 +19,8 @@ export default defineComponent({
     const dialogVisible = ref<boolean>(false)
     const editDialogVisible = ref<boolean>(false)
     const selectedRole = ref<Role | null>(null)
+    const permissionVisible = ref<boolean>(false)
+    const roleId = ref<number>(0)
 
     const fetchRoles = async () => {
       const { roles: data, total: count } = await RoleService.fetchRoles(
@@ -46,6 +49,12 @@ export default defineComponent({
       fetchRoles()
     }
 
+    // 展现权限设置界面
+    const handlePermission = (role: Role) => {
+      roleId.value = role.id
+      permissionVisible.value = true
+    }
+
     const handleEdit = (role: Role) => {
       selectedRole.value = role
       editDialogVisible.value = true
@@ -70,6 +79,10 @@ export default defineComponent({
       editDialogVisible.value = false
     }
 
+    const handlePerCancelEdit = () => {
+      permissionVisible.value = false
+    }
+
     onMounted(() => {
       fetchRoles()
     })
@@ -91,6 +104,10 @@ export default defineComponent({
       handleDelete,
       handleCancel,
       handleCancelEdit,
+      handlePermission,
+      permissionVisible,
+      handlePerCancelEdit,
+      roleId,
     }
   },
 
@@ -125,14 +142,17 @@ export default defineComponent({
                 <el-button type="danger" size="small" @click="handleDelete(row)">
                   删除
                 </el-button>
+                <el-button type="danger" size="small" @click="handlePermission(row)">
+                  权限
+                </el-button>
               </el-button-group>
             </template>
           </el-table-column>
         </el-table>
         <div class="pagination">
           <el-pagination
-            v-model:current-page="currentPage" :page-size="pageSize" layout="prev, pager, next" :total="total"
-            @current-change="handlePageChange"
+            v-model:current-page="currentPage" :page-size="pageSize" layout="prev, pager, next"
+            :total="total" @current-change="handlePageChange"
           />
         </div>
         <!-- <el-dialog title="添加日志" :visible.sync="dialogVisible" width="50%"> -->
@@ -144,6 +164,10 @@ export default defineComponent({
         <el-dialog v-model="editDialogVisible" :close-on-click-modal="false" class="!w-2xl" draggable title="编辑角色">
           <RoleForm :role="selectedRole" @submit="handleUpdate" @cancel="handleCancelEdit" />
         </el-dialog>
+
+        <el-dialog v-model="permissionVisible" :close-on-click-modal="false" class="!w-2xl" draggable title="权限设置"  destroy-on-close="true">
+          <PermissionForm :role-id="roleId" @submit="handlePerCancelEdit" @cancel="handlePerCancelEdit" />
+        </el-dialog>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -151,8 +175,8 @@ export default defineComponent({
 
 <style scoped>
 .pagination {
-    text-align: right;
-    margin-top: 20px;
+  text-align: right;
+  margin-top: 20px;
 }
 </style>
 
@@ -161,4 +185,5 @@ meta:
   layout: home
   title: 角色管理
   icon: i-carbon:user-role
+  order: 12
 </route>

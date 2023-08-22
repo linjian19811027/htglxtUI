@@ -4,6 +4,7 @@ export interface MaterialInventory {
   id: number
 
   materialId: string
+  materialId_txt: string
   materialNo: string
   materialInventory: number
   createName: string
@@ -40,6 +41,7 @@ export class MaterialInventoryService {
       const materialInventorys: MaterialInventory[] = records.map((record: any) => ({
         id: record.id,
         materialId: record.materialId,
+        materialId_txt: record.materialId_txt,
         materialNo: record.materialNo,
 
         materialInventory: record.materialInventory,

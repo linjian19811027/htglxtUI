@@ -174,4 +174,5 @@ meta:
   layout: home
   title: 日志管理
   icon: i-iconoir:ecology-book
+  order: 14
 </route>

@@ -184,4 +184,5 @@ meta:
   layout: home
   title: 字典管理
   icon: i-icon-park:book
+  order: 9
 </route>

@@ -23,6 +23,7 @@ export interface Task {
   taskReceiver: string
   taskReceiverId: string
   taskState: string
+  taskState_txt: string
   contentUpload1: string
   contentUpload2: string
   yaoQiuUpload1: string
@@ -108,6 +109,100 @@ export class TaskService {
         taskReceiver: record.taskReceiver,
         taskReceiverId: record.taskReceiverId,
         taskState: record.taskState,
+        taskState_txt: record.taskState_txt,
+        contentUpload1: record.contentUpload1,
+        contentUpload2: record.contentUpload2,
+        yaoQiuUpload1: record.yaoQiuUpload1,
+        yaoQiuUpload2: record.yaoQiuUpload2,
+        wanChengUpload1: record.wanChengUpload1,
+        wanChengUpload2: record.wanChengUpload2,
+        nextTaskType: record.nextTaskType,
+        mainId: record.mainId,
+        nextTaskEndTime: record.nextTaskEndTime,
+        state: record.state,
+        taskType_txt: record.taskType_txt,
+        nextTaskType_txt: record.nextTaskType_txt,
+        state_txt: record.state_txt,
+        taskMaterials: record.taskMaterials,
+      }))
+
+      // 返回包含日志记录和总数的对象
+      return { tasks, total }
+    }
+    catch (error) {
+      if (error.response.status === 401)
+        useUserStore().logout()
+    }
+  }
+
+  public static async fetchTasksMy(
+    pageNum: number,
+    pageSize: number,
+    taskTitle?: string,
+    taskCompany?: string,
+    taskType?: string,
+
+    taskCreateTimeStart?: string,
+    taskCreateTimeEnd?: string,
+
+    taskEndTimeStart?: string,
+    taskEndTimeEnd?: string,
+
+  ): Promise<{ tasks: Task[]; total: number }> {
+    const token = localStorage.getItem('token') || ''
+    const url = new URL(`https://htglxtapi.inscode.cc/businessTask/taskListByUser?pageNum=${pageNum}&pageSize=${pageSize}`, window.location.href)
+    if (taskTitle)
+      url.searchParams.set('taskTitle', taskTitle)
+    if (taskCompany)
+      url.searchParams.set('taskCompany', taskCompany)
+    if (taskType)
+      url.searchParams.set('taskType', taskType)
+    if (taskCreateTimeStart)
+      url.searchParams.set('taskCreateTimeStart', `${taskCreateTimeStart} 0:0:0`)
+    if (taskCreateTimeEnd)
+      url.searchParams.set('taskCreateTimeEnd', `${taskCreateTimeEnd} 23:59:59`)
+
+    if (taskEndTimeStart)
+      url.searchParams.set('taskEndTimeStart', `${taskEndTimeStart} 0:0:0`)
+    if (taskEndTimeEnd)
+      url.searchParams.set('taskEndTimeEnd', `${taskEndTimeEnd} 23:59:59`)
+
+    try {
+      const response = await axios.get(url.href, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+      })
+
+      // 对返回结果进行解构赋值
+      const { records, total } = response.data.data
+
+      // 将返回的记录列表转换成 Log 类型数组
+      const tasks: Task[] = records.map((record: any) => ({
+        id: record.id,
+        parentTaskId: record.parentTaskId,
+        taskTitle: record.taskTitle,
+        taskType: record.taskType,
+        taskNo: record.taskNo,
+        taskCompany: record.taskCompany,
+        taskContacts: record.taskContacts,
+        taskTel: record.taskTel,
+        taskMaterial: record.taskMaterial,
+        taskContent: record.taskContent,
+        taskFactEndTime: record.taskFactEndTime,
+        taskFactContent: record.taskFactContent,
+        taskFactAddress: record.taskFactAddress,
+        taskEndTime: record.taskEndTime,
+        taskCreateUser: record.taskCreateUser,
+        taskCreateUserId: record.taskCreateUserId,
+        taskCreateTime: record.taskCreateTime,
+        participantsIds: record.participantsIds,
+        participantsNames: record.participantsNames,
+        taskReceiver: record.taskReceiver,
+        taskReceiverId: record.taskReceiverId,
+        taskState: record.taskState,
+        taskState_txt: record.taskState_txt,
         contentUpload1: record.contentUpload1,
         contentUpload2: record.contentUpload2,
         yaoQiuUpload1: record.yaoQiuUpload1,
@@ -299,6 +394,7 @@ export class TaskService {
     }
   }
 
+  // 用户打分
   public static async submitTaskUserScore(data: any): Promise<void> {
     const token = localStorage.getItem('token') || ''
     await fetch('https://htglxtapi.inscode.cc/businessTaskUser', {
@@ -317,6 +413,51 @@ export class TaskService {
     if (task.participantsIds)
       task.participantsIds = task.participantsIds.join(', ')
     await fetch('https://htglxtapi.inscode.cc/businessTask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token,
+      },
+      body: JSON.stringify(task),
+    })
+  }
+
+  // 普通任务任务接收
+  public static async receiveTask(task: Task): Promise<void> {
+    const token = localStorage.getItem('token') || ''
+    if (task.participantsIds)
+      task.participantsIds = task.participantsIds.join(', ')
+    await fetch('https://htglxtapi.inscode.cc/weChatMiniProgram/acceptTask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token,
+      },
+      body: JSON.stringify(task),
+    })
+  }
+
+  // 返工任务
+  public static async reworkTask(task: Task): Promise<void> {
+    const token = localStorage.getItem('token') || ''
+    if (task.participantsIds)
+      task.participantsIds = task.participantsIds.join(', ')
+    await fetch('https://htglxtapi.inscode.cc/weChatMiniProgram/reworkTask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token,
+      },
+      body: JSON.stringify(task),
+    })
+  }
+
+  // 完工
+  public static async completeTask(task: Task): Promise<void> {
+    const token = localStorage.getItem('token') || ''
+    if (task.participantsIds)
+      task.participantsIds = task.participantsIds.join(', ')
+    await fetch('https://htglxtapi.inscode.cc/weChatMiniProgram/completeTask', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

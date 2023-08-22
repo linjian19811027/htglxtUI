@@ -163,4 +163,5 @@ meta:
   layout: home
   title: 权限管理
   icon: i-icon-park:permissions
+  order: 11
 </route>

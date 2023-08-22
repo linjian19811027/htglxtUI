@@ -164,4 +164,5 @@ meta:
   layout: home
   title: 菜单管理
   icon: i-ep:menu
+  order: 10
 </route>

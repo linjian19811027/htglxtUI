@@ -130,7 +130,7 @@ export default defineComponent({
           </el-button-group>
         </el-row>
         <el-table :data="materialLogs" stripe sticky-header border>
-          <el-table-column prop="materialName" label="材料名称" />
+          <el-table-column prop="materialId_txt" label="材料名称" />
           <el-table-column prop="materialNo" label="材料编号" />
           <el-table-column prop="materialAmount" label="进货数量" />
           <el-table-column prop="createTime" label="进货时间" />
@@ -181,4 +181,5 @@ meta:
   layout: home
   title: 进货管理
   icon: i-mdi:login
+  order: 4
 </route>

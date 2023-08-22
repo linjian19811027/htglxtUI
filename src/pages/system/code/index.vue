@@ -165,4 +165,5 @@ meta:
   layout: home
   title: 编号管理
   icon: i-system-uicons:code
+  order: 8
 </route>

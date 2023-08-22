@@ -11,6 +11,8 @@ export interface User {
   unionid: string
   sex_txt: string
   isAdmin: boolean
+  roleId: string
+  roleId_txt: string
   sex: 0 | 1
   permissions: string[] // 权限
   users: string[] // 角色
@@ -48,6 +50,7 @@ export class UserService {
         mobile: record.mobile,
         sex: record.sex,
         sex_txt: record.sex_txt,
+        roleId_txt: record.roleId_txt,
       }))
 
       // 返回包含日志记录和总数的对象
@@ -83,6 +86,49 @@ export class UserService {
     })
   }
 
+  // public static async editPassWord(user: User): Promise<any> {
+  //   const token = localStorage.getItem('token') || ''
+  //   await fetch('https://htglxtapi.inscode.cc/sysUser/editPassWord', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Authorization': token,
+  //     },
+  //     body: JSON.stringify(user),
+  //   })
+  // }
+  // public static async editPassWord(user: User): Promise<any> {
+  //   const token = localStorage.getItem('token') || ''
+  //   return await fetch('https://htglxtapi.inscode.cc/sysUser/editPassWord', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Authorization': token,
+  //     },
+  //     body: JSON.stringify(user),
+  //   }).then((res) => {
+  //       return res // 修改成功，返回 true
+  //   }).catch(error => {
+  //     console.log(error)
+  //     return "123" // 抛出错误，返回 false
+  //   })
+  // }
+  public static async editPassWord(user: User): Promise<any> {
+    const token = localStorage.getItem('token') || '';
+    try {
+      const response = await axios.post('https://htglxtapi.inscode.cc/sysUser/editPassWord', user, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return "123";
+    }
+  }
+  
   public static async deleteUser(id: number): Promise<void> {
     const token = localStorage.getItem('token') || ''
     await fetch(`https://htglxtapi.inscode.cc/sysUser/${id}`, {
@@ -92,6 +138,29 @@ export class UserService {
         'Authorization': token,
       },
     })
+  }
+
+  public static async fetchRole(): Promise<{ roles: any[] }> {
+    const token = localStorage.getItem('token') || ''
+    const url = new URL('https://htglxtapi.inscode.cc/sysRole', window.location.href)
+
+    try {
+      const response = await axios.get(url.href, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+      })
+
+      // 对返回结果进行解构赋值
+      const records = response.data.data
+
+      // 返回包含日志记录和总数的对象
+      return records
+    }
+    catch (error) {
+
+    }
   }
 }
 // export function getUserList(params: object) {

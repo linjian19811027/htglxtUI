@@ -3,6 +3,7 @@ import { defineComponent, ref, watch } from 'vue'
 import type { Task } from '../task'
 import { TaskService } from '../task'
 
+// 创建任务
 interface TaskFormProps {
   task?: Task
   isEditting?: boolean
@@ -85,7 +86,6 @@ export default defineComponent({
     const uploadUuid5 = ref<string>('')
     const uploadUuid6 = ref<string>('')
 
-
     const uploadFileList1 = ref([])
     const uploadFileList2 = ref([])
     const uploadFileList3 = ref([])
@@ -95,7 +95,7 @@ export default defineComponent({
 
     const getFileList = async () => {
       if (task.value.id) {
-        debugger
+         
         const data1 = await TaskService.fetchSysFile(task.value.contentUpload1)
         uploadFileList1.value = data1
 
@@ -108,15 +108,12 @@ export default defineComponent({
         const data4 = await TaskService.fetchSysFile(task.value.yaoQiuUpload2)
         uploadFileList4.value = data4
 
-
         const data5 = await TaskService.fetchSysFile(task.value.wanChengUpload1)
         uploadFileList5.value = data5
 
         const data6 = await TaskService.fetchSysFile(task.value.wanChengUpload2)
         uploadFileList6.value = data6
       }
-
-
     }
 
     const activeNames = ref(['1'])
@@ -286,7 +283,6 @@ export default defineComponent({
       uploadFileList5,
       uploadFileList6,
 
- 
     }
   },
 })
@@ -316,7 +312,7 @@ export default defineComponent({
     <el-form-item label="项目素材存放地址" prop="taskMaterial">
       <el-input v-model.lazy="task.taskMaterial" :disabled="!isEditting" />
     </el-form-item>
-    <el-form-item label="项目所需材料" prop="taskMaterials">
+    <!-- <el-form-item label="项目所需材料" prop="taskMaterials">
       <el-collapse v-model="activeNames">
         <el-collapse-item title="材料" name="1">
           <el-row type="flex" justify="space-between">
@@ -357,14 +353,24 @@ export default defineComponent({
           </el-table>
         </el-collapse-item>
       </el-collapse>
-    </el-form-item>
+    </el-form-item> -->
     <el-form-item label="任务内容" prop="taskContent">
       <el-input v-model.lazy="task.taskContent" :disabled="!isEditting" />
     </el-form-item>
-    <el-form-item label="任务预计完成时间" prop="taskEndTime">
-      <el-date-picker v-model="task.taskEndTime" type="date" placeholder="选择日期" :disabled="!isEditting"
-        format="YYYY-MM-DD" value-format="YYYY-MM-DD HH:mm:ss" />
+
+    <el-form-item label="下达时间" prop="taskEndTime">
+      <el-date-picker
+        v-model="task.taskCreateTime" type="date" placeholder="选择日期" :disabled="!isEditting"
+        format="YYYY-MM-DD" value-format="YYYY-MM-DD HH:mm:ss"
+      />
     </el-form-item>
+    <el-form-item label="完成时间" prop="taskEndTime">
+      <el-date-picker
+        v-model="task.taskEndTime" type="date" placeholder="选择日期" :disabled="!isEditting"
+        format="YYYY-MM-DD" value-format="YYYY-MM-DD HH:mm:ss"
+      />
+    </el-form-item>
+
     <!-- <el-form-item label="任务创建人" prop="taskCreateUser">
       <el-input v-model.lazy="task.taskCreateUser" :disabled="!isEditting" />
     </el-form-item>
@@ -380,30 +386,27 @@ export default defineComponent({
         value-format="yyyy-MM-dd"
       />
     </el-form-item> -->
-    <el-form-item label="任务参与者" prop="participantsIds">
-      <!-- <el-input v-model.lazy="task.participantsIds" :disabled="!isEditting" /> -->
-      <!-- <ChoseUser v-model:key="task.participantsIds" :disabled="isEditting" :data="hduser" /> -->
-      <!-- <transfer-input v-model="selectedIds" :data="data"></transfer-input> -->
+    <!-- <el-form-item label="任务参与者" prop="participantsIds">
       <el-select v-model="task.participantsIds" multiple placeholder="选择参与者">
         <el-option v-for="item in hduser" :key="item.id" :label="item.username" :value="item.id" />
       </el-select>
-    </el-form-item>
+    </el-form-item> -->
     <!-- <el-form-item label="任务参与者名称" prop="participantsNames">
       <el-input v-model.lazy="task.participantsNames" :disabled="!isEditting" />
     </el-form-item> -->
     <!-- <el-form-item label="任务接收者" prop="taskReceiver">
       <el-input v-model.lazy="task.taskReceiver" :disabled="!isEditting" />
     </el-form-item> -->
-    <el-form-item label="任务接收者" prop="taskReceiverId">
+    <!-- <el-form-item label="任务接收者" prop="taskReceiverId">
       <el-input v-model.lazy="task.taskReceiverId" :disabled="!isEditting" />
-    </el-form-item>
+    </el-form-item> -->
     <!-- <el-form-item label="任务状态" prop="taskState">
       <el-radio-group v-model="task.taskState" :disabled="!isEditting">
         <el-radio label="进行中" />
         <el-radio label="已完成" />
       </el-radio-group>
     </el-form-item> -->
-    <el-form-item label="任务实际完成时间" prop="taskFactEndTime">
+    <!-- <el-form-item label="任务实际完成时间" prop="taskFactEndTime">
       <el-date-picker v-model="task.taskFactEndTime" type="date" placeholder="选择日期" :disabled="!isEditting"
         format="YYYY-MM-DD" value-format="YYYY-MM-DD HH:mm:ss" />
     </el-form-item>
@@ -412,143 +415,47 @@ export default defineComponent({
     </el-form-item>
     <el-form-item label="任务实际地址" prop="taskFactAddress">
       <el-input v-model.lazy="task.taskFactAddress" :disabled="!isEditting" />
-    </el-form-item>
+    </el-form-item> -->
     <!-- <el-form-item label="图片展示没什么用">
       <img v-if="imageUrl" :src="imageUrl" class="avatar">
     </el-form-item> -->
-    <el-form-item label="任务内容上传1" prop="contentUpload1">
-      <HtImgUpload :uuid="task.contentUpload1" :file-list="uploadFileList1" button-text="选文件" :disabled="!isEditting"
-        :action="action" :headers="upLoadHeaders" :before-avatar-upload="beforeAvatarUpload" />
-        <!-- <pre>12356{{ uploadFileList1Ref }}</pre> -->
-      <!-- <el-upload ref="upload1" class="avatar-uploader" :disabled="!isEditting" name="file" :auto-upload="false"
-        :file-list="[]" :limit="1" :data="{ type: 'contentUpload1' }" :headers="upLoadHeaders"
-        action="https://htglxtapi.inscode.cc/sysFile/upload" :on-success="handleAvatarSuccess"
-        :before-upload="beforeAvatarUpload">
-        <template #trigger>
-          <el-button type="primary">选择文件</el-button>
-        </template>
-
-        <el-button class="ml-3" type="success" :disabled="!isEditting" @click="submit1">
-          上传文件
-        </el-button>
-
-        <template #tip>
-          <div class="el-upload__tip">
-            支持格式：jpg/png/gif，文件大小不超过2M
-          </div>
-        </template>
-
-      </el-upload> -->
+    <el-form-item label="任务内容图片上传" prop="contentUpload1">
+      <HtImgUpload
+        :uuid="task.contentUpload1" :file-list="uploadFileList1" button-text="选文件" :disabled="!isEditting"
+        :action="action" :headers="upLoadHeaders" :before-avatar-upload="beforeAvatarUpload"
+      />
     </el-form-item>
-    <el-form-item label="任务内容上传2" prop="contentUpload2">
-      <!-- <HtUpload
-        v-model:value="task.contentUpload2" :uuid="task.contentUpload2" button-text="选文件" :disabled="!isEditting"
+    <el-form-item label="任务内容音频上传" prop="contentUpload2">
+      <HtUpload
+        :uuid="task.contentUpload2" :file-list="uploadFileList2" button-text="选文件" :disabled="!isEditting"
         :action="action" :headers="upLoadHeaders" :before-upload="beforeAvatarUpload"
-      /> -->
-      <HtImgUpload :uuid="task.contentUpload2" :file-list="uploadFileList2" button-text="选文件" :disabled="!isEditting"
-        :action="action" :headers="upLoadHeaders" :before-avatar-upload="beforeAvatarUpload" />
-      <!-- <el-upload
-        ref="upload1"
-        class="avatar-uploader" :disabled="!isEditting" name="file" :auto-upload="false" :file-list="[]"
-        :data="{ type: 'contentUpload2' }" :limit="1" :headers="upLoadHeaders"
-        action="https://htglxtapi.inscode.cc/sysFile/upload" :on-success="handleAvatarSuccess"
-        :before-upload="beforeAvatarUpload"
-      >
-        <el-button slot="trigger" size="small" :disabled="!isEditting">
-          <i class="el-icon-upload2" /> 选择文件
-        </el-button>
-        <el-button size="small" type="success" :disabled="!isEditting" @click="submit1">
-          上传文件
-        </el-button>
-        <div slot="tip" class="el-upload__tip">
-          支持格式：jpg/png/gif，文件大小不超过2M
-        </div>
-      </el-upload> -->
-    </el-form-item>
-    <el-form-item label="任务要求上传1" prop="yaoQiuUpload1">
-      <HtUpload :uuid="task.yaoQiuUpload1" :file-list="uploadFileList3" button-text="选文件" :disabled="!isEditting"
-        :action="action" :headers="upLoadHeaders" :before-upload="beforeAvatarUpload" />
+      />
 
-      <!-- <el-upload
-        class="avatar-uploader" :disabled="!isEditting" name="file" :auto-upload="false" :file-list="[]"
-        :limit="1" :data="{ type: 'yaoQiuUpload1' }" :headers="{ Authorization: `Bearer ${token}` }"
-        action="https://htglxtapi.inscode.cc/sysFile/upload" :on-success="handleAvatarSuccess"
-        :before-upload="beforeAvatarUpload"
-      >
-        <el-button slot="trigger" size="small" :disabled="!isEditting">
-          <i class="el-icon-upload2" /> 选择文件
-        </el-button>
-        <el-button size="small" type="success" :disabled="!isEditting">
-          上传文件
-        </el-button>
-        <div slot="tip" class="el-upload__tip">
-          支持格式：jpg/png/gif，文件大小不超过2M
-        </div>
-      </el-upload> -->
-    </el-form-item>
-    <el-form-item label="任务要求上传2" prop="yaoQiuUpload2">
-      <HtUpload :uuid="task.yaoQiuUpload2" :file-list="uploadFileList4" button-text="选文件" :disabled="!isEditting"
-        :action="action" :headers="upLoadHeaders" :before-upload="beforeAvatarUpload" />
+ 
 
-      <!-- <el-upload
-        class="avatar-uploader" :disabled="!isEditting" name="file" :auto-upload="false" :file-list="[]"
-        :limit="1" :data="{ type: 'yaoQiuUpload2' }" :headers="{ Authorization: `Bearer ${token}` }"
-        action="https://htglxtapi.inscode.cc/sysFile/upload" :on-success="handleAvatarSuccess"
-        :before-upload="beforeAvatarUpload"
-      >
-        <el-button slot="trigger" size="small" :disabled="!isEditting">
-          <i class="el-icon-upload2" /> 选择文件
-        </el-button>
-        <el-button size="small" type="success" :disabled="!isEditting">
-          上传文件
-        </el-button>
-        <div slot="tip" class="el-upload__tip">
-          支持格式：jpg/png/gif，文件大小不超过2M
-        </div>
-      </el-upload> -->
     </el-form-item>
-    <el-form-item label="任务完成上传1" prop="wanChengUpload1">
+    <el-form-item label="任务要求图片上传" prop="yaoQiuUpload1">
+      <HtImgUpload
+        :uuid="task.yaoQiuUpload1" :file-list="uploadFileList3" button-text="选文件" :disabled="!isEditting"
+        :action="action" :headers="upLoadHeaders" :before-avatar-upload="beforeAvatarUpload"
+      />
+    </el-form-item>
+    <el-form-item label="任务要求音频上传" prop="yaoQiuUpload2">
+      <HtUpload
+        :uuid="task.yaoQiuUpload2" :file-list="uploadFileList4" button-text="选文件" :disabled="!isEditting"
+        :action="action" :headers="upLoadHeaders" :before-upload="beforeAvatarUpload"
+      />
+    </el-form-item>
+    <!-- <el-form-item label="任务完成上传1" prop="wanChengUpload1">
       <HtUpload :uuid="task.wanChengUpload1" :file-list="uploadFileList5" button-text="选文件" :disabled="!isEditting"
         :action="action" :headers="upLoadHeaders" :before-upload="beforeAvatarUpload" />
 
-      <!-- <el-upload
-        class="avatar-uploader" :disabled="!isEditting" name="file" :limit="1" :auto-upload="false"
-        :file-list="[]" :data="{ type: 'wanChengUpload1' }" :headers="{ Authorization: `Bearer ${token}` }"
-        action="https://htglxtapi.inscode.cc/sysFile/upload" :on-success="handleAvatarSuccess"
-        :before-upload="beforeAvatarUpload"
-      >
-        <el-button slot="trigger" size="small" :disabled="!isEditting">
-          <i class="el-icon-upload2" /> 选择文件
-        </el-button>
-        <el-button size="small" type="success" :disabled="!isEditting">
-          上传文件
-        </el-button>
-        <div slot="tip" class="el-upload__tip">
-          支持格式：jpg/png/gif，文件大小不超过2M
-        </div>
-      </el-upload> -->
     </el-form-item>
     <el-form-item label="任务完成上传2" prop="wanChengUpload2">
       <HtUpload :uuid="task.wanChengUpload2" :file-list="uploadFileList6" button-text="选文件" :disabled="!isEditting"
         :action="action" :headers="upLoadHeaders" :before-upload="beforeAvatarUpload" />
 
-      <!-- <el-upload
-        class="avatar-uploader" :disabled="!isEditting" name="file" :limit="1" :auto-upload="false"
-        :file-list="[]" :data="{ type: 'wanChengUpload2' }" :headers="{ Authorization: `Bearer ${token}` }"
-        action="https://htglxtapi.inscode.cc/sysFile/upload" :on-success="handleAvatarSuccess"
-        :before-upload="beforeAvatarUpload"
-      >
-        <el-button slot="trigger" size="small" :disabled="!isEditting">
-          <i class="el-icon-upload2" /> 选择文件
-        </el-button>
-        <el-button size="small" type="success" :disabled="!isEditting">
-          上传文件
-        </el-button>
-        <div slot="tip" class="el-upload__tip">
-          支持格式：jpg/png/gif，文件大小不超过2M
-        </div>
-      </el-upload> -->
-    </el-form-item>
+    </el-form-item> -->
     <el-form-item>
       <el-button v-if="isEditting" type="primary" @click="handleSubmit">
         保存

@@ -170,4 +170,5 @@ meta:
   layout: home
   title: 材料管理
   icon: i-icon-park:material-two
+  order: 7
 </route>
