@@ -208,6 +208,7 @@ export default defineComponent({
       handleCancelUserRateEdit,
       handleCancelEdit1,
       handleReceiveTask1,
+      handleReceiveTask,
       handleReworkTask,
       editDialogVisible1,
     }

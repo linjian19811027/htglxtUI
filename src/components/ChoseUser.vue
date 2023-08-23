@@ -42,7 +42,7 @@ export default defineComponent({
       // debugger
       // selectedValue.value = [...value.value] // 创建一个新的变量，并将value的值赋给它
       // emit('update:key', selectedValue.value.join(', ')) // 通过自定义事件将选择的值传递给父组件
-      debugger
+      //debugger
 
       dialogVisible.value = false
     }

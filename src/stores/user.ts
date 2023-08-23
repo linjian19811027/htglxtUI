@@ -24,7 +24,7 @@ export const useUserStore = defineStore('main', {
     sidebarList() {
       const getSidebarList = (routes: RouteRecordRaw[]) => routes
         .reduce((result: RouteRecordRaw[], route) => {
-          debugger
+          // debugger
           if (route.path == '/') {
             result.push({
               ...route,
